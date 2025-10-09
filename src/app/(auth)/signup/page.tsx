@@ -1,61 +1,65 @@
 "use client";
-import { signIn, signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { useState, FormEvent, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState, FormEvent } from "react";
+import { useRouter } from "next/navigation";
 
-export default function Login() {
+export default function Signup() {
     const [username, setUserName] = useState("");
     const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-    const [successMessage, setSuccessMessage] = useState("");
     const { data: session, status } = useSession();
     const router = useRouter();
-    const searchParams = useSearchParams();
 
-    useEffect(() => {
-        const message = searchParams.get('message');
-        if (message) {
-            setSuccessMessage(message);
-            // Clear the URL parameter
-            const url = new URL(window.location.href);
-            url.searchParams.delete('message');
-            window.history.replaceState({}, '', url.toString());
-        }
-    }, [searchParams]);
-
-    const handleLogin = async (e: FormEvent) => {
+    const addUser = async (e: FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError("");
 
+        // Validate passwords match
+        if (password !== confirmPassword) {
+            setError("Passwords do not match");
+            setLoading(false);
+            return;
+        }
+
+        // Validate password length
+        if (password.length < 6) {
+            setError("Password must be at least 6 characters long");
+            setLoading(false);
+            return;
+        }
+
         try {
-            const result = await signIn("credentials", {
-                username: username,
-                password: password,
-                redirect: false, // Important: handle redirect manually
+            const response = await fetch('/api/auth', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username,
+                    password,
+                }),
             });
 
-            if (result?.error) {
-                setError(result.error);
+            const data = await response.json();
+
+            if (response.ok) {
+                // Registration successful - redirect to signin
+                router.push('/signin?message=Registration successful. Please sign in.');
             } else {
-                // Login successful - redirect to dashboard or home
-                router.push("/dashboard");
+                setError(data.error || 'Registration failed');
             }
         } catch (error) {
-            setError("An error occurred during login");
+            setError('An error occurred during registration');
         } finally {
             setLoading(false);
         }
-    };
+    }
 
-    const handleLogout = async () => {
-        await signOut({ redirect: false });
-        router.refresh(); // Refresh to update the session state
-    };
-
-    // If user is already logged in, show different UI
+    // Show loading state while checking session
     if (status === "loading") {
         return <div>Loading...</div>;
     }
@@ -67,12 +71,6 @@ export default function Login() {
                     <h2 className="text-2xl font-bold mb-4 text-center">Welcome!</h2>
                     <p className="mb-4 text-center">You are already logged in as {session.user?.username}</p>
                     <div className="text-center">
-                        <button
-                            onClick={handleLogout}
-                            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-                        >
-                            Sign Out
-                        </button>
                         <Link 
                             href="/dashboard" 
                             className="ml-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
@@ -90,10 +88,10 @@ export default function Login() {
             <div className="max-w-md w-full space-y-8">
                 <div>
                     <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                        Sign in to Null Pointer
+                        Sign Up to Null Pointer
                     </h2>
                 </div>
-                <form className="mt-8 space-y-6" onSubmit={handleLogin}>
+                <form className="mt-8 space-y-6" onSubmit={addUser}>
                     <div className="rounded-md shadow-sm -space-y-px">
                         <div>
                             <input
@@ -115,13 +113,17 @@ export default function Login() {
                                 onChange={(e) => setPassword(e.target.value)}
                             />
                         </div>
-                    </div>
-
-                    {successMessage && (
-                        <div className="text-green-600 text-sm text-center bg-green-50 py-2 rounded">
-                            {successMessage}
+                        <div>
+                            <input
+                                type="password"
+                                required
+                                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                                placeholder="Confirm Password"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                            />
                         </div>
-                    )}
+                    </div>
 
                     {error && (
                         <div className="text-red-600 text-sm text-center bg-red-50 py-2 rounded">
@@ -135,15 +137,15 @@ export default function Login() {
                             disabled={loading}
                             className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-red-700 hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
                         >
-                            {loading ? "Signing in..." : "Sign in"}
+                            {loading ? "Signing up..." : "Sign up"}
                         </button>
                     </div>
 
                     <div className="text-center">
                         <p className="text-sm text-gray-600">
-                            Don't have an account?{" "}
-                            <Link href="/signup" className="text-red-600 hover:text-red-500">
-                                Register
+                            Already have an account?{" "}
+                            <Link href="/signin" className="text-red-600 hover:text-red-500">
+                                Sign in
                             </Link>
                         </p>
                     </div>
