@@ -3,6 +3,7 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useState, FormEvent, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { userSignInSchema } from "@/app/lib/schema";
 
 export default function Login() {
     const [username, setUserName] = useState("");
@@ -30,6 +31,16 @@ export default function Login() {
         setLoading(true);
         setError("");
 
+        const validateField = userSignInSchema.safeParse({
+          username:username,
+          password: password
+        });
+        if(!validateField.success){
+          const errorMsg = validateField.error.issues.map(issue => issue.message).join(',');
+          setError(errorMsg);
+          setLoading(false);
+          return;
+        }
         try {
             const result = await signIn("credentials", {
                 username: username,
@@ -40,7 +51,6 @@ export default function Login() {
             if (result?.error) {
                 setError(result.error);
             } else {
-                // Login successful - redirect to dashboard or home
                 router.push("/dashboard");
             }
         } catch (error) {

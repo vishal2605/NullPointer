@@ -3,6 +3,7 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { userSignUpSchema } from "@/app/lib/schema";
 
 export default function Signup() {
     const [username, setUserName] = useState("");
@@ -18,22 +19,19 @@ export default function Signup() {
         setLoading(true);
         setError("");
 
-        // Validate passwords match
-        if (password !== confirmPassword) {
-            setError("Passwords do not match");
+        const validateField = userSignUpSchema.safeParse({
+            username: username,
+            password:password,
+            confirmPassword:confirmPassword
+        });
+        if(!validateField.success){
+            const errorMsg = validateField.error.issues.map(issue => issue.message).join(',');
+            setError(errorMsg);
             setLoading(false);
             return;
         }
-
-        // Validate password length
-        if (password.length < 6) {
-            setError("Password must be at least 6 characters long");
-            setLoading(false);
-            return;
-        }
-
         try {
-            const response = await fetch('/api/auth', {
+            const response = await fetch('/api/auth/signup', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -41,14 +39,14 @@ export default function Signup() {
                 body: JSON.stringify({
                     username,
                     password,
+                    confirm_password:confirmPassword
                 }),
             });
 
             const data = await response.json();
 
             if (response.ok) {
-                // Registration successful - redirect to signin
-                router.push('/signin?message=Registration successful. Please sign in.');
+                router.push('/dashboard');
             } else {
                 setError(data.error || 'Registration failed');
             }

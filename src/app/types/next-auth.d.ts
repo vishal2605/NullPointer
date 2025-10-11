@@ -19,6 +19,11 @@ declare module 'next-auth' {
       image?: string | null;
     };
   }
+  interface Credentials {
+    username : string;
+    password : string,
+    isSignup : string | null
+  }
 }
 
 declare module 'next-auth/jwt' {
