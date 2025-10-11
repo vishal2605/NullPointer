@@ -1,22 +1,21 @@
 "use client";
-import { signOut, useSession } from "next-auth/react"
+
+import CTA from "@/app/component/layout/CTA";
+import Features from "@/app/component/layout/Features";
+import Footer from "@/app/component/layout/Footer";
+import Hero from "@/app/component/layout/Hero";
+import Stats from "@/app/component/layout/Stats";
 
 
 export default function Dashboard(){
-    const session = useSession();
-
-    const handleLogout = () => {
-        signOut();
-    }
 
     return (
-        <div>
-            {JSON.stringify(session)} 
-            dashboard
-            <button onClick={handleLogout}>
-                Logout
-            </button>
+        <div className="min-h-screen">
+            <Hero/>
+            <Stats />
+            <Features />
+            <CTA />
+            <Footer/>
         </div>
-
     )
 }
