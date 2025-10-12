@@ -2,32 +2,41 @@
 import { prisma } from "@/app/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(_: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    const problems = await prisma.problem.findMany({
-      select: {
-        id: true,
-        title: true,
-        difficulty: true,
-        relatedTopics: true,
-        acceptance: true,
-      },
-    });
+    const {searchParams} = new URL(request.url)
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '20');
+    const difficulty = searchParams.get('difficulty') || 'all';
+    const start = (page-1)*limit;
+
+    const problems = await prisma.problem.findMany();
 
     if (!problems.length)
       return NextResponse.json({ problems: [] }, { status: 200 });
 
-    // normalise shape for the frontend
-    const payload = problems.map((p) => ({
-      id: p.id,
-      title: p.title,
-      difficulty: p.difficulty,
-      acceptance: p.acceptance,
-      tags: p.relatedTopics,
-      solved: false, // Default to false for now
-    }));
+    let filteredProblem = problems.map((p) => ({
+        id: p.id,
+        title: p.title,
+        difficulty: p.difficulty,
+        acceptance: p.acceptance,
+        tags: p.relatedTopics,
+        solved: false,
+      }));;
 
-    return NextResponse.json({ problems: payload });
+    if(difficulty!='all'){
+        filteredProblem=filteredProblem.filter(problem => problem.difficulty.toLowerCase()===difficulty);
+    }
+    filteredProblem = filteredProblem.slice(start, start+limit);
+    const hasMore = start + limit < problems.length
+
+    return NextResponse.json({
+        problems: filteredProblem,
+        hasMore,
+        total: problems.length,
+        page,
+        limit
+      });
   } catch (error) {
     console.error("[api/problems]", error);
     return NextResponse.json(
