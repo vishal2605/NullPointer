@@ -6,3 +6,13 @@ interface Problem {
     solved: boolean;
     acceptance: string;
   }
+interface ProblemDetail{
+    id:number;
+    title:string,
+    difficulty: "Easy" | "Medium" | "Hard";
+    solved: boolean;
+    acceptance: string;
+    description : string;
+    companies:string[];
+    related_topics:string[];
+}
