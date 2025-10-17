@@ -13,7 +13,7 @@ export default function Problem({ params }: { params: Promise<{ id: string }> })
     useEffect(() => {
         async function fetchProblem() {
             try {
-                const response = await fetch(`/api/problems/${id}`);
+                const response = await fetch(`/api/problem/${id}`);
                 if (!response.ok) throw new Error('Problem not found');
 
                 const data = await response.json();

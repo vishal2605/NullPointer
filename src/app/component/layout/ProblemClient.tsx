@@ -1,12 +1,13 @@
 'use client'
 
-import { Badge, Play, Send } from "lucide-react"
+import { Play, Send } from "lucide-react"
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "../ui/ResizablePanelGroup"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/Select"
 import { useState } from "react";
 import { Button } from "../ui/Button";
 import Editor from "@monaco-editor/react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/Tabs";
+import { Badge } from "../ui/Badge";
 
 export default function ProblemClient({problem}:{problem:ProblemDetail}){
 
