@@ -6,7 +6,7 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/app/lib/generated/prisma"
+  output   = "../../src/app/lib/generated/prisma"
 }
 
 datasource db {
@@ -27,10 +27,11 @@ model Problem {
   description    String
   difficulty     String
   acceptance     Float
-  slug           String
+  slug           String         @unique
   companies      String[]
   relatedTopics  String[]
   submission     Submission[]
+  defaultCode    DefaultCode[]
 }
 
 model Submission {
@@ -55,9 +56,12 @@ model Testcase {
 
 model DefaultCode{
   id      Int     @id  @default(autoincrement())
-  name    String
+  code    String
+  fullCode String 
   languageId  Int 
+  problemId   Int
   language   Language    @relation(fields: [languageId], references: [id])
+  problem    Problem     @relation(fields: [problemId], references: [id])
 }
 
 model Language {
