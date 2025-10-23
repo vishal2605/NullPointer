@@ -6,7 +6,7 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../../src/app/lib/generated/prisma"
+  output   = "../src/app/lib/generated/prisma"
 }
 
 datasource db {
@@ -67,6 +67,7 @@ model DefaultCode{
 model Language {
   id    Int    @id  @default(autoincrement())
   name  String 
+  judge0Id  Int  @default(0)
   submission Submission[]
   defaultCode   DefaultCode[]
 }

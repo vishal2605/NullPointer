@@ -6,11 +6,12 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
+    "prisma:generate": "prisma generate --schema=./prisma/schema.prisma",
     "lint": "eslint"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
-    "@prisma/client": "^6.17.0",
+    "@prisma/client": "^6.17.1",
     "@radix-ui/react-slot": "^1.2.3",
     "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.1",
@@ -33,7 +34,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.5.4",
-    "prisma": "^6.17.0",
+    "prisma": "^6.17.1",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"

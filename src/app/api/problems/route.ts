@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
         acceptance: p.acceptance,
         tags: p.relatedTopics,
         solved: false,
-      }));;
+      }));
 
     if(difficulty!='all'){
         filteredProblem=filteredProblem.filter(problem => problem.difficulty.toLowerCase()===difficulty);

@@ -1,3 +1,4 @@
+
 import { prisma } from "@/app/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -9,6 +10,12 @@ export async function GET(request : NextRequest,{ params }: { params: { id: stri
             where:{id}
         });
 
+
+        const defaultCode = await prisma.defaultCode.findMany({
+            where: { problemId: id }
+          });
+        
+        const language = await prisma.language.findMany();
         if(!problem){
             return NextResponse.json({
                 msg : "problem doesn't exist"
@@ -21,6 +28,8 @@ export async function GET(request : NextRequest,{ params }: { params: { id: stri
             difficulty: problem.difficulty,
             acceptance: problem.acceptance,
             companies: problem.companies,
+            language: language,
+            defaultCode: defaultCode,
             related_topics: problem.relatedTopics
         });
     } catch (error) {
