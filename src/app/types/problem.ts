@@ -26,3 +26,12 @@ interface Problem {
     }>;
     related_topics: string[];
   }
+
+  interface Submission {
+    id: number;
+    status: string;
+    language: string;
+    passedCount: number;
+    submittedTime: string;
+    totalTime: number;
+  }
