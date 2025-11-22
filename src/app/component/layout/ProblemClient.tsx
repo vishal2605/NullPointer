@@ -8,6 +8,8 @@ import { Button } from "../ui/Button";
 import Editor from "@monaco-editor/react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/Tabs";
 import { Badge } from "../ui/Badge";
+import { POST } from "@/app/api/auth/signup/route";
+import { METHODS } from "http";
 
 
 
@@ -40,6 +42,23 @@ export default function ProblemClient({ problem }: { problem: ProblemDetail }) {
     Medium: "bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/20",
     Hard: "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20"
   };
+
+  const handleSubmit = async () => {
+    const data = {
+      problemId : problem.id,
+      languageId : problem.language.find(lan => lan.name === language)?.id,
+      code : code
+    }
+
+    const response = await fetch('/api/problem/submit', {
+      method: 'POST',
+      body: JSON.stringify(data),
+      headers: {
+          'Content-Type': 'application/json'
+      }
+    });
+    console.log(response);
+  }
 
   const handleLanguageChange = (newLanguage: string) => {
     setLanguage(newLanguage);
@@ -157,7 +176,7 @@ export default function ProblemClient({ problem }: { problem: ProblemDetail }) {
               <div className="p-4 space-y-4">
                 {/* Action Buttons */}
                 <div className="flex gap-2">
-                  <Button variant="secondary" className="gap-2">
+                  <Button variant="secondary" className="gap-2" onClick={handleSubmit}>
                     <Play className="h-4 w-4" />
                     Run Code
                   </Button>

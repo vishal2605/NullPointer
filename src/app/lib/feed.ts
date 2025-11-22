@@ -1,8 +1,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { prisma } from './db';
-
+import { prisma } from "@repo/db";
 
 const PROBLEMS_ROOT_DIR = path.join(process.cwd(), 'problems'); 
 

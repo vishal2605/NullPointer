@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { userSignUpSchema } from "@/app/lib/schema";
 import bcrypt from "bcryptjs";
-import { prisma } from "@/app/lib/db";
+import { prisma } from "@repo/db";
+
 
 
 export async function POST(request:NextRequest) {

@@ -2,14 +2,6 @@
 
 # dependencies
 /node_modules
-/src/judge0 integration/node_modules
-/src/judge0 integration/.env
-/src/judge0 integration/dist
-/packages/db/node_modules/
-/packages/db/dist/
-/src/boilerplate generator/node_modules/
-/src/webhook server/node_modules/
-/src/webhook server/dist/
 /.pnp
 .pnp.*
 .yarn/*

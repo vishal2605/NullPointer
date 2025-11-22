@@ -1,7 +1,7 @@
 // app/api/problems/route.ts
-import { prisma } from "@/app/lib/db";
-import { NextRequest, NextResponse } from "next/server";
 
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@repo/db";
 export async function GET(request: NextRequest) {
   try {
     const {searchParams} = new URL(request.url)

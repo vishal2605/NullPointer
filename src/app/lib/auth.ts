@@ -1,7 +1,7 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { userSignInSchema } from "@/app/lib/schema";
-import { prisma } from "./db";
+import { prisma } from "@repo/db";
 
 
 export const authOptions: NextAuthOptions = {
