@@ -95,7 +95,8 @@ export async function POST(request: NextRequest, response: NextResponse){
             })
         }
         console.log('submission : ',submission)
-        const fullCode = defaultCode.fullCode.replace("//USER_CODE_HERE",data.code);
+        const token = language?.name === 'python' ? '#USER_CODE_HERE' : '//USER_CODE_HERE';
+        const fullCode = defaultCode.fullCode.replace(token, data.code);
         console.log(fullCode);
 
         await submissionQueue.add('processSubmisson',{

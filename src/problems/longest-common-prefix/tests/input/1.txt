@@ -1,1 +1,4 @@
-dog race car
+3
+dog
+race
+car

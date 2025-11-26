@@ -127,6 +127,7 @@ const processTestCase = async (file: string,
         const timeout = setTimeout(() => {controller.abort()}, 10000);
 
         try {
+            console.log('code',code);
             const response = await fetch(`${judge0Url}/submissions?wait=true`,{
                 method : "POST",
                 headers: {
@@ -149,7 +150,8 @@ const processTestCase = async (file: string,
 
             const testCaseStatus = getTestCaseStatus(result.status.id);
             const time = result.time ? parseFloat(result.time) : 0;
-            
+            console.log('compile_output', result.compile_output);
+            console.log('error', result);
             return {
                 status: testCaseStatus,
                 time: time,
@@ -201,7 +203,6 @@ const processSubmission = async (data: any)=> {
         console.log(`Processing test case: ${file} for submission ${submissionId}`);
 
         const result = await processTestCase(file, submissionId, code, judge0Id, inputDir, outputDir);
-
         if(result.status=='PASSED'){
             passedCount++;
         }
