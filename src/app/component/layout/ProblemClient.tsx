@@ -66,7 +66,7 @@ export default function ProblemClient({ problem }: { problem: ProblemDetail }) {
 
         {/* Right Panel - Code Editor */}
         <ResizablePanel defaultSize={60} minSize={40}>
-          <Tabs>
+          <Tabs defaultValue="code">
             <TabsList>
               <TabsTrigger value="code">Code</TabsTrigger>
               <TabsTrigger value="submissions">Submissions</TabsTrigger>
@@ -76,7 +76,7 @@ export default function ProblemClient({ problem }: { problem: ProblemDetail }) {
               <ProblemCode problem={problem}/>
             </TabsContent>
             <TabsContent value="submissions">
-                  <Submission problemId={problem.id} userId={session.data?.user.id}/>
+              <Submission problemId={problem.id} userId={session.data?.user.id}/>
             </TabsContent>
           </Tabs>
           

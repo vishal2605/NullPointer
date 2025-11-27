@@ -24,6 +24,7 @@
     "class-variance-authority": "^0.7.1",
     "dotenv": "^17.2.3",
     "fs": "^0.0.1-security",
+    "jotai": "^2.15.1",
     "lucide-react": "^0.545.0",
     "next": "15.5.4",
     "next-auth": "^4.24.11",

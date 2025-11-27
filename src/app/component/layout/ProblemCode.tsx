@@ -1,17 +1,30 @@
+// components/ProblemCode.tsx
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/Select"
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { Button } from "../ui/Button";
 import Editor from "@monaco-editor/react";
-import { Play, Send } from "lucide-react"
+import { Play, Send, RotateCcw } from "lucide-react"
 import Testcase from "../ui/Testcase";
+import { useProblem } from "@/app/context/ProblemContext";
+import { useAtom } from 'jotai';
+import { languageStateAtom } from "@/app/store/atoms/languageStateAtom";
+
 
 export default function ProblemCode({ problem }: { problem: ProblemDetail }) {
-    const [language, setLanguage] = useState("cpp");
-    const [code, setCode] = useState<string>('');
+    const [language, setLanguage] = useAtom(languageStateAtom);
     const [testcases, setTestcases] = useState<string[]>([]);
     const [isSubmit, setIsSubmit] = useState<boolean>(false);
     const [submissionId, setSubmissionId] = useState<number | null>(null);
     const [pollingState, setPollingState] = useState<'idle' | 'polling' | 'completed'>('idle');
+    
+    const { setCodeForProblem, getCodeForProblem, clearProblemCode } = useProblem();
+    
+    // Get code from context or use default - using useCallback to avoid recreating on every render
+    const getInitialCode = useCallback(() => {
+        return getCodeForProblem(problem.id, language, '');
+    }, [problem.id, language, getCodeForProblem]);
+
+    const [code, setCode] = useState<string>(getInitialCode);
 
     const pollData = useRef({
         count: 0,
@@ -20,27 +33,40 @@ export default function ProblemCode({ problem }: { problem: ProblemDetail }) {
         maxDuration: 30000
     });
 
-    // Get available languages from the problem data - MOVED UP
     const availableLanguages = problem?.language?.map(lang => lang.name) || ['cpp', 'java', 'python'];
 
+    // Update code in context whenever it changes (with debouncing)
     useEffect(() => {
-        async function fetchDetails(id: number) {
-            try {
-                const defaultCodeEntry = problem.defaultCode.find(
-                    (codeEntry: any) =>
-                        problem.language.find((lang: any) => lang.id === codeEntry.languageId)?.name === language
-                );
-                if (defaultCodeEntry) {
-                    setCode(defaultCodeEntry.code);
+        const timeoutId = setTimeout(() => {
+            if (code !== undefined && code !== null && code !== '') {
+                setCodeForProblem(problem.id, language, code);
+            }
+        }, 500); // Debounce to avoid too many localStorage writes
+
+        return () => clearTimeout(timeoutId);
+    }, [code, problem.id, language, setCodeForProblem]);
+
+    // Reset code when problem changes
+    useEffect(() => {
+        const savedCode = getCodeForProblem(problem.id, language);
+        
+        if (savedCode) {
+            // Use saved code if it exists
+            setCode(savedCode);
+        } else {
+            // Otherwise, set default code for this language
+            const defaultCodeEntry = problem?.defaultCode?.find(
+                codeEntry => {
+                    const lang = problem.language.find(l => l.id === codeEntry.languageId);
+                    return lang?.name === language;
                 }
-            } catch (error) {
-                console.error("Error fetching problem details:", error);
+            );
+            if (defaultCodeEntry?.code) {
+                setCode(defaultCodeEntry.code);
+                setCodeForProblem(problem.id, language, defaultCodeEntry.code);
             }
         }
-        if (problem?.id) {
-            fetchDetails(problem.id);
-        }
-    }, [problem?.id, language]);
+    }, [problem.id, problem.defaultCode, problem.language, language, getCodeForProblem, setCodeForProblem]);
 
     // Polling function
     const startPolling = async (submissionId: number) => {
@@ -73,32 +99,27 @@ export default function ProblemCode({ problem }: { problem: ProblemDetail }) {
                 }
                 
                 const data = await response.json();
-                console.log('Polling response:', data); // Debug log
+                console.log('Polling response:', data);
 
                 pollData.current.count++;
 
                 if (data.state === 'PENDING') {
-                    // Continue polling
                     setTimeout(poll, 1000);
                 } else {
-                    // Final result received
                     setTestcases(data.testcases || []);
                     setPollingState('completed');
                     setIsSubmit(false);
                 }
             } catch (error) {
                 console.error('Polling error:', error);
-                // Retry on error with exponential backoff
                 const backoffDelay = Math.min(1000 * Math.pow(2, pollData.current.count), 5000);
                 setTimeout(poll, backoffDelay);
             }
         };
 
-        // Start polling
         poll();
     };
 
-    // Stop polling when component unmounts
     useEffect(() => {
         return () => {
             setPollingState('completed');
@@ -129,7 +150,7 @@ export default function ProblemCode({ problem }: { problem: ProblemDetail }) {
 
             if (response.ok) {
                 const result = await response.json();
-                console.log('Submission response:', result); // Debug log
+                console.log('Submission response:', result);
                 if (result.submissionId) {
                     setIsSubmit(true);
                     startPolling(result.submissionId);
@@ -177,33 +198,42 @@ export default function ProblemCode({ problem }: { problem: ProblemDetail }) {
     }
 
     const handleLanguageChange = (newLanguage: string) => {
+        // Get saved code for the new language, or default code if none exists
+        const savedCode = getCodeForProblem(problem.id, newLanguage);
+        if (savedCode) {
+            setCode(savedCode);
+        } else {
+            const defaultCodeEntry = problem?.defaultCode?.find(
+                codeEntry => {
+                    const lang = problem.language.find(l => l.id === codeEntry.languageId);
+                    return lang?.name === newLanguage;
+                }
+            );
+            setCode(defaultCodeEntry?.code || "");
+        }
         setLanguage(newLanguage);
-        // Find and set the default code for the new language
+    };
+
+    const handleResetCode = () => {
         const defaultCodeEntry = problem?.defaultCode?.find(
             codeEntry => {
                 const lang = problem.language.find(l => l.id === codeEntry.languageId);
-                return lang?.name === newLanguage;
-            }
-        );
-        setCode(defaultCodeEntry?.code || "");
-    };
-
-    // Get the default code template when language changes
-    useEffect(() => {
-        const defaultCodeEntry = problem?.defaultCode?.find(
-            codeEntry => {
-                const lang = problem?.language?.find(l => l.id === codeEntry.languageId);
                 return lang?.name === language;
             }
         );
-        if (defaultCodeEntry && !code) {
+        if (defaultCodeEntry?.code) {
             setCode(defaultCodeEntry.code);
         }
-    }, [language, problem?.defaultCode, problem?.language, code]);
+    };
+
+    const handleClearSavedCode = () => {
+        clearProblemCode(problem.id, language);
+        handleResetCode();
+    };
 
     return (
         <div className="h-[calc(100vh-100px)] flex flex-col">
-            {/* Language Selector */}
+            {/* Language Selector and Controls */}
             <div className="border-b bg-card px-4 py-2 flex items-center gap-3">
                 <span className="text-sm font-medium">Language:</span>
                 <Select value={language} onValueChange={handleLanguageChange}>
@@ -221,7 +251,17 @@ export default function ProblemCode({ problem }: { problem: ProblemDetail }) {
                     </SelectContent>
                 </Select>
 
-                {/* Polling Status Indicator */}
+                {/* Reset Button */}
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleResetCode}
+                    className="gap-2"
+                >
+                    <RotateCcw className="h-3 w-3" />
+                    Reset
+                </Button>
+
                 {pollingState === 'polling' && (
                     <div className="flex items-center gap-2 ml-auto">
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
@@ -269,6 +309,19 @@ export default function ProblemCode({ problem }: { problem: ProblemDetail }) {
                         >
                             <Send className="h-4 w-4" />
                             {pollingState === 'polling' ? 'Submitting...' : 'Submit'}
+                        </Button>
+                    </div>
+
+                    {/* Storage Info */}
+                    <div className="text-xs text-gray-500 flex justify-between items-center">
+                        <span>Your code is automatically saved</span>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleClearSavedCode}
+                            className="h-6 text-xs"
+                        >
+                            Clear saved code
                         </Button>
                     </div>
 

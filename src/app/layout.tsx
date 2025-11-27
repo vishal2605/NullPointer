@@ -4,7 +4,6 @@ import "./globals.css";
 import Provider from "./provider";
 import Navigation from "./component/layout/navigation";
 
-
 export default function RootLayout({
   children,
 }: Readonly<{
