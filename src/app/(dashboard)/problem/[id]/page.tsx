@@ -4,7 +4,6 @@ import { use, useEffect, useState } from 'react';
 import ProblemClient from "@/app/component/layout/ProblemClient";
 
 export default function Problem({ params }: { params: Promise<{ id: string }> }) {
-    // ✅ Unwrap params (required in Next.js 15+)
     const { id } = use(params);
 
     const [problem, setProblem] = useState<any>(null);

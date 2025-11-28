@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useRef } from 'react';
 
 interface CodeState {
   [problemId: string]: {
@@ -14,6 +14,7 @@ interface ProblemContextType {
   getCodeForProblem: (problemId: number, language: string, defaultCode?: string) => string;
   clearProblemCode: (problemId: number, language?: string) => void;
   clearAllCode: () => void;
+  resetAllStorage: () => void
 }
 
 const ProblemContext = createContext<ProblemContextType | undefined>(undefined);
@@ -24,6 +25,7 @@ const STORAGE_KEY = 'problem-code-state';
 export function ProblemProvider({ children }: { children: ReactNode }) {
   const [codeState, setCodeState] = useState<CodeState>({});
   const [isLoaded, setIsLoaded] = useState(false);
+  const skipSaveRef = useRef(false);
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -44,14 +46,15 @@ export function ProblemProvider({ children }: { children: ReactNode }) {
 
   // Save to localStorage whenever codeState changes
   useEffect(() => {
-    if (isLoaded) {
+    if (isLoaded && !skipSaveRef.current) {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(codeState));
       } catch (error) {
-        console.error('Failed to save code state to localStorage:', error);
+        console.error("Failed to save code state:", error);
       }
     }
   }, [codeState, isLoaded]);
+  
 
   const setCodeForProblem = (problemId: number, language: string, code: string) => {
     setCodeState(prev => ({
@@ -62,6 +65,16 @@ export function ProblemProvider({ children }: { children: ReactNode }) {
       }
     }));
   };
+
+  const resetAllStorage = () => {
+    skipSaveRef.current = true;   // stop saving
+    localStorage.removeItem(STORAGE_KEY);
+    setCodeState({});             // clear state
+    setTimeout(() => {
+      skipSaveRef.current = false; // re-enable saving after cycle
+    }, 0);
+  };
+  
 
   const getCodeForProblem = (problemId: number, language: string, defaultCode: string = '') => {
     return codeState[problemId]?.[language] || defaultCode;
@@ -99,7 +112,8 @@ export function ProblemProvider({ children }: { children: ReactNode }) {
       setCodeForProblem, 
       getCodeForProblem,
       clearProblemCode,
-      clearAllCode
+      clearAllCode,
+      resetAllStorage
     }}>
       {children}
     </ProblemContext.Provider>
