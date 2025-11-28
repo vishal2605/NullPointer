@@ -1,8 +1,24 @@
 import { prisma } from "@repo/db";
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/lib/auth";
 
 export async function GET(request: NextRequest) {
   try {
+
+    const session = await getServerSession(authOptions);
+
+    if (!session || !session.user?.id) {
+      return NextResponse.json(
+        { 
+          error: "Authentication required",
+          message: "Please sign in to access this resource"
+        },
+        { status: 401 }
+      );
+    }
+
+
     const submissionId = Number(request.nextUrl.searchParams.get("submissionId"));
     
     // Input validation

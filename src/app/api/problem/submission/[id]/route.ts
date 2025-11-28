@@ -1,24 +1,49 @@
 import { prisma } from "@repo/db";
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/lib/auth";
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const problemId = Number(params.id);
-    const userId = Number(request.nextUrl.searchParams.get("userId"));
+    // Get session with authOptions
+    const session = await getServerSession(authOptions);
 
-    if (!problemId || !userId) {
+    if (!session || !session.user?.id) {
       return NextResponse.json(
-        { error: "Missing problemId or userId" },
+        { 
+          error: "Authentication required",
+          message: "Please sign in to access this resource"
+        },
+        { status: 401 }
+      );
+    }
+
+    const problemId = Number(params.id);
+    const userId = Number(session.user.id);
+
+    if (!problemId || isNaN(problemId)) {
+      return NextResponse.json(
+        { error: "Valid problemId is required" },
         { status: 400 }
       );
     }
 
-    // Fetch all submissions
+    if (!userId || isNaN(userId)) {
+      return NextResponse.json(
+        { error: "Invalid user session" },
+        { status: 400 }
+      );
+    }
+
+    // Fetch submissions only for the authenticated user
     const submissions = await prisma.submission.findMany({
-      where: { problemId, userId },
+      where: { 
+        problemId, 
+        userId // This ensures users can only see their own submissions
+      },
       orderBy: { id: "desc" },
     });
 
@@ -47,7 +72,7 @@ export async function GET(
           passedCount,
           totalTime,
           submittedTime: entity.submittedTime,
-          language : language?.name,
+          language: language?.name,
         };
       })
     );

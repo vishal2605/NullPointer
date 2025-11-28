@@ -8,6 +8,7 @@ import Testcase from "../ui/Testcase";
 import { useProblem } from "@/app/context/ProblemContext";
 import { useAtom } from 'jotai';
 import { languageStateAtom } from "@/app/store/atoms/languageStateAtom";
+import { useSession } from "next-auth/react";
 
 
 export default function ProblemCode({ problem }: { problem: ProblemDetail }) {
@@ -16,6 +17,7 @@ export default function ProblemCode({ problem }: { problem: ProblemDetail }) {
     const [isSubmit, setIsSubmit] = useState<boolean>(false);
     const [submissionId, setSubmissionId] = useState<number | null>(null);
     const [pollingState, setPollingState] = useState<'idle' | 'polling' | 'completed'>('idle');
+    const session = useSession()
     
     const { setCodeForProblem, getCodeForProblem, clearProblemCode } = useProblem();
     
@@ -93,7 +95,7 @@ export default function ProblemCode({ problem }: { problem: ProblemDetail }) {
             }
 
             try {
-                const response = await fetch(`http://localhost:3000/api/problem/check?submissionId=${submissionId}`);
+                const response = await fetch(`/api/problem/check?submissionId=${submissionId}`);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -160,40 +162,6 @@ export default function ProblemCode({ problem }: { problem: ProblemDetail }) {
             }
         } catch (error) {
             console.error('Submission error:', error);
-        }
-    }
-
-    const handleRunCode = async () => {
-        const languageObj = problem?.language?.find(lan => lan.name === language);
-        if (!languageObj?.id) {
-            console.error('Language not found');
-            return;
-        }
-
-        const data = {
-            problemId: problem.id,
-            languageId: languageObj.id,
-            code: code
-        }
-
-        try {
-            const response = await fetch('/api/problem/run', {
-                method: 'POST',
-                body: JSON.stringify(data),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (response.ok) {
-                const result = await response.json();
-                if (result.submissionId) {
-                    setIsSubmit(true);
-                    startPolling(result.submissionId);
-                }
-            }
-        } catch (error) {
-            console.error('Run code error:', error);
         }
     }
 
@@ -294,24 +262,18 @@ export default function ProblemCode({ problem }: { problem: ProblemDetail }) {
                     {/* Action Buttons */}
                     <div className="flex gap-2">
                         <Button
-                            variant="secondary"
-                            className="gap-2"
-                            onClick={handleRunCode}
-                            disabled={pollingState === 'polling'}
-                        >
-                            <Play className="h-4 w-4" />
-                            {pollingState === 'polling' ? 'Running...' : 'Run Code'}
-                        </Button>
-                        <Button
                             className="gap-2"
                             onClick={handleSubmit}
-                            disabled={pollingState === 'polling'}
+                            disabled={session.status=== 'unauthenticated' || pollingState === 'polling'}
                         >
                             <Send className="h-4 w-4" />
                             {pollingState === 'polling' ? 'Submitting...' : 'Submit'}
                         </Button>
+                        
                     </div>
-
+                    {session.status ==='unauthenticated' && <div className="text-red-500">
+                        Please log in to submit
+                            </div>}
                     {/* Storage Info */}
                     <div className="text-xs text-gray-500 flex justify-between items-center">
                         <span>Your code is automatically saved</span>

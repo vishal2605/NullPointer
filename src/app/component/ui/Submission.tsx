@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo, useCallback, memo } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./Table";
+import { useSession } from "next-auth/react";
 
 // Regular utility functions (no hooks)
 const getStatusColor = (status: string): string => {
@@ -25,7 +26,7 @@ const formatLeetCodeTime = (timestamp: string): string => {
   const diffInMinutes = Math.floor(diffInSeconds / 60);
   const diffInHours = Math.floor(diffInMinutes / 60);
   const diffInDays = Math.floor(diffInHours / 24);
-  
+
   if (diffInSeconds < 60) return "just now";
   if (diffInMinutes < 60) return `${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''} ago`;
   if (diffInHours < 24) return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
@@ -73,8 +74,9 @@ SubmissionRow.displayName = 'SubmissionRow';
 
 export default function Submission({ problemId, userId }: { problemId: number, userId: string | undefined }) {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const session = useSession();
 
   // Sort submissions by timestamp (newest first) - memoized
   const sortedSubmissions = useMemo(() => {
@@ -85,14 +87,14 @@ export default function Submission({ problemId, userId }: { problemId: number, u
 
   // Fetch submissions with useCallback to prevent unnecessary re-renders
   const fetchSubmissions = useCallback(async () => {
+    if(session.status==='unauthenticated' || session.status==='loading')return;
     if (!problemId) return;
     
     try {
       setLoading(true);
       setError(null);
       
-      const res = await fetch(`/api/problem/submission/${problemId}${userId ? `?userId=${userId}` : ''}`);
-      
+      const res = await fetch(`/api/problem/submission/${problemId}`);
       if (!res.ok) {
         throw new Error(`Failed to fetch submissions: ${res.status}`);
       }
@@ -151,8 +153,9 @@ export default function Submission({ problemId, userId }: { problemId: number, u
   }
 
   return (
+    
     <div className="border rounded-lg">
-      <Table>
+      {session.status === 'authenticated' ?<Table>
         <TableHeader>
           <TableRow>
             <TableHead>Status</TableHead>
@@ -165,7 +168,10 @@ export default function Submission({ problemId, userId }: { problemId: number, u
         <TableBody>
           {tableBodyContent}
         </TableBody>
-      </Table>
+      </Table> : <div className="flex flex-col items-center justify-center p-8 text-center">
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Login Required</h3>
+        <p className="text-gray-500 mb-4">Please sign in to view your submissions.</p>
+        </div>}
     </div>
   );
 }
