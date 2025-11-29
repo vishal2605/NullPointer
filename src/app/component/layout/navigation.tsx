@@ -41,15 +41,17 @@ export default function Navigation(){
     function goToProfilePage(){
         router.push("/profile");
     }
+    function goToDashboardPage(){
+        router.push("/dashboard");
+    }
     return (
         <div className="flex justify-between p-2">
             <div className='flex'>
-                <Image src={logo} alt="Logo" height={50} width={50} priority />
+                <div onClick={goToDashboardPage}>
+                    <Image src={logo} alt="Logo" height={50} width={50} priority />
+                </div>
                 <div className='flex items-center pl-3 hover:text-red-700'onClick={goToProblemPage}>
                     Problems
-                </div>
-                <div className='flex items-center pl-3 hover:text-red-700' onClick={goToDiscussPage}>
-                    Discuss
                 </div>
             </div>
             <div className='flex items-center'>

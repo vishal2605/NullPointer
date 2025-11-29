@@ -26,13 +26,21 @@ export default function Login() {
         }
     }, [searchParams]);
 
+    // Redirect to dashboard immediately if authenticated
+    useEffect(() => {
+        if (status === "authenticated" && session) {
+            // push to dashboard
+            router.push("/dashboard");
+        }
+    }, [status, session, router]);
+
     const handleLogin = async (e: FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError("");
 
         const validateField = userSignInSchema.safeParse({
-          username:username,
+          username: username,
           password: password
         });
         if(!validateField.success){
@@ -65,36 +73,19 @@ export default function Login() {
         router.refresh(); // Refresh to update the session state
     };
 
-    // If user is already logged in, show different UI
-    if (status === "loading") {
-        return <div>Loading...</div>;
-    }
-
-    if (session) {
+    // Show a loading state while session is being checked or when redirecting
+    if (status === "loading" || status === "authenticated") {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-md">
-                    <h2 className="text-2xl font-bold mb-4 text-center">Welcome!</h2>
-                    <p className="mb-4 text-center">You are already logged in as {session.user?.username}</p>
-                    <div className="text-center">
-                        <button
-                            onClick={handleLogout}
-                            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-                        >
-                            Sign Out
-                        </button>
-                        <Link 
-                            href="/dashboard" 
-                            className="ml-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                        >
-                            Go to Dashboard
-                        </Link>
-                    </div>
+                <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-md text-center">
+                    <h2 className="text-xl font-medium mb-2">Redirecting…</h2>
+                    <p className="text-sm text-gray-600">If you are not redirected, <Link href="/dashboard" className="text-red-600">click here</Link>.</p>
                 </div>
             </div>
         );
     }
 
+    // If no session, show login form
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-md w-full space-y-8">
