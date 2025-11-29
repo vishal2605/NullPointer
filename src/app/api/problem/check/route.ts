@@ -38,10 +38,15 @@ export async function GET(request: NextRequest) {
         Testcase: {
           select: {
             status: true,
+            index: true,   
+          },
+          orderBy: {
+            index: "asc",  
           },
         },
       },
     });
+    
 
     // Check if submission exists
     if (!submission) {

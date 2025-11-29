@@ -108,7 +108,10 @@ export default function ProblemCode({ problem }: { problem: ProblemDetail }) {
                 if (data.state === 'PENDING') {
                     setTimeout(poll, 1000);
                 } else {
-                    setTestcases(data.testcases || []);
+                    const ordered = Object.keys(data.testcases)
+                    .sort((a, b) => Number(a.replace("tc", "")) - Number(b.replace("tc", "")))
+                    .map(key => data.testcases[key]);
+                    setTestcases(ordered || []);
                     setPollingState('completed');
                     setIsSubmit(false);
                 }

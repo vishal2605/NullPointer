@@ -2,6 +2,7 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { userSignInSchema } from "@/app/lib/schema";
 import { prisma } from "@repo/db";
+import bcrypt from "bcryptjs";
 
 
 export const authOptions: NextAuthOptions = {
@@ -26,6 +27,12 @@ export const authOptions: NextAuthOptions = {
           const user = await prisma.user.findUnique({
             where: { username: validatedData.username },
           });
+
+          const isPasswordCorrect = await bcrypt.compare(credentials.password, user.password);
+
+          if (!isPasswordCorrect) {
+            throw new Error("Incorrect Password");
+          }
 
           if (!user) {
             throw new Error("Invalid credentials");

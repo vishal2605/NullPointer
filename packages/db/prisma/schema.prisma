@@ -49,6 +49,7 @@ model Submission {
 
 model Testcase {
   id           Int    @id @default(autoincrement())
+  index        Int    @default(0)
   submissionId Int 
   status       String 
   time         Float?
