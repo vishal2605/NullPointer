@@ -31,8 +31,8 @@ export default function ProblemCode({ problem }: { problem: ProblemDetail }) {
     const pollData = useRef({
         count: 0,
         startTime: Date.now(),
-        maxPolls: 15,
-        maxDuration: 30000
+        maxPolls: 30,
+        maxDuration: 40000
     });
 
     const availableLanguages = problem?.language?.map(lang => lang.name) || ['cpp', 'java', 'python'];
@@ -77,8 +77,8 @@ export default function ProblemCode({ problem }: { problem: ProblemDetail }) {
         pollData.current = {
             count: 0,
             startTime: Date.now(),
-            maxPolls: 15,
-            maxDuration: 30000
+            maxPolls: 30,
+            maxDuration: 40000
         };
 
         const poll = async () => {

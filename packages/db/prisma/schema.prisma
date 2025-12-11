@@ -65,6 +65,7 @@ model DefaultCode{
   problemId   Int
   language   Language    @relation(fields: [languageId], references: [id])
   problem    Problem     @relation(fields: [problemId], references: [id])
+  @@unique([problemId, languageId])
 }
 
 model Language {
