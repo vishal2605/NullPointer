@@ -1,19 +1,21 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Provider from "./provider";
 import Navigation from "./component/layout/navigation";
-
-export default function RootLayout({
+import { authOptions } from "./lib/auth";
+import { getServerSession } from "next-auth";
+import { NextAuthOptions } from "next-auth";
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await getServerSession(authOptions as NextAuthOptions);
+
   return (
     <html lang="en">
       <body>
-        <Provider>
-          <Navigation/>
+        <Provider session={session}>
+          <Navigation />
           {children}
         </Provider>
       </body>
