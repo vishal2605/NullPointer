@@ -4,6 +4,10 @@
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "prisma generate --schema=./prisma/schema.prisma && tsc",
+    "prisma:generate": "prisma generate --schema=./prisma/schema.prisma"
+  },
   "dependencies": {
     "@prisma/client": "^6.17.1"
   },

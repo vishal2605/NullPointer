@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE "Submission" ADD COLUMN     "submittedTime" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;

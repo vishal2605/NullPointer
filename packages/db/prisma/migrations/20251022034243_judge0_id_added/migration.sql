@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE "Language" ADD COLUMN     "judge0Id" INTEGER NOT NULL DEFAULT 0;

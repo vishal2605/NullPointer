@@ -1,16 +1,8 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
-/src/judge0 integration/node_modules
-/src/judge0 integration/.env
-/src/judge0 integration/dist
-/packages/db/node_modules/
-/packages/db/dist/
-/src/boilerplate generator/node_modules/
-/src/webhook server/node_modules/
-/src/webhook server/dist/
-/.pnp
+node_modules/
+.pnp
 .pnp.*
 .yarn/*
 !.yarn/patches
@@ -19,14 +11,17 @@
 !.yarn/versions
 
 # testing
-/coverage
+coverage/
+*.log
 
 # next.js
-/.next/
-/out/
+**/.next/
+**/out/
+.vercel
 
-# production
-/build
+# production builds (exclude build outputs - rebuild on server)
+**/dist/
+**/build/
 
 # misc
 .DS_Store
@@ -38,12 +33,33 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
-
-# vercel
-.vercel
+# env files (NEVER commit these - set on server)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Prisma generated (will be regenerated on server)
+# Keep schema.prisma and migrations, but ignore generated client
+# packages/db/node_modules/.prisma/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
