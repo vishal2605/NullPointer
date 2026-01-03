@@ -1,19 +1,19 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { prisma } from "@repo/db";
+import { authOptions } from "@/lib/auth";
 
 export async function GET() {
   try {
-    const session = await getServerSession();
-    if (!session) {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const userId = session.user.id;
+    const userId = Number(session.user.id);
 
     const submissions = await prisma.submission.findMany({
-      where: { userId: Number(userId) },
-      take: 5,
+      where: { userId: userId },
       orderBy: { submittedTime: "desc" },
       select: {
         id: true,

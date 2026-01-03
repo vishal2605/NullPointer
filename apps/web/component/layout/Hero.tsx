@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 const Hero= () => {
     const router = useRouter();
     const handleSolving = () => {
-        router.push('/dashboard');
+        router.push('/problems');
     }
     return (
         <section className="relative min-h-screen flex items-center justify-center overflow-hidden">

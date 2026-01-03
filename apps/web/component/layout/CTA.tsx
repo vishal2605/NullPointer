@@ -1,7 +1,13 @@
 import { ArrowRight } from "lucide-react";
 import { Button } from "../ui/Button";
+import { useRouter } from "next/navigation";
 
 const CTA = () => {
+
+  const router = useRouter();
+  const handleSolving = () => {
+    router.push('/problems');
+  }
   return (
     <section className="py-24 px-4 relative overflow-hidden">
       {/* Glow Effects */}
@@ -15,7 +21,7 @@ const CTA = () => {
           Join thousands of developers mastering data structures and algorithms. 
           Start solving problems today—no experience required.
         </p>
-        <Button variant="hero" size="lg" className="text-lg px-8 group">
+        <Button variant="hero" size="lg" className="text-lg px-8 group" onClick={handleSolving}>
           Get Started Now
           <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
         </Button>

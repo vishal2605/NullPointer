@@ -107,7 +107,7 @@ function LoadingSpinner() {
   return (
     <div className="flex justify-center items-center py-8">
       <Loader2 className="w-6 h-6 animate-spin text-primary" />
-      <span className="ml-2 text-muted-foreground">Loading more problems...</span>
+      <span className="ml-2 text-muted-foreground">Loading problems...</span>
     </div>
   );
 }

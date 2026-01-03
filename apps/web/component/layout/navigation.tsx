@@ -7,7 +7,6 @@ import { useSession } from 'next-auth/react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useProblem } from "@/context/ProblemContext";
 
-
 export default function Navigation(){
 
     const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -35,9 +34,6 @@ export default function Navigation(){
     function goToProblemPage(){
         router.push("/problems");
     }
-    function goToDiscussPage(){
-        router.push("/discuss");
-    }
     function goToProfilePage(){
         router.push("/profile");
     }
@@ -50,8 +46,10 @@ export default function Navigation(){
                 <div onClick={goToDashboardPage}>
                     <Image src={logo} alt="Logo" height={50} width={50} priority />
                 </div>
-                <div className='flex items-center pl-3 hover:text-red-700'onClick={goToProblemPage}>
-                    Problems
+                <div className='flex items-center pl-3 font-semibold hover:text-red-700'onClick={goToProblemPage}>
+                    <button className='bg-transparent border-none cursor-pointer'>
+                        Problems
+                    </button>
                 </div>
             </div>
             <div className='flex items-center'>
