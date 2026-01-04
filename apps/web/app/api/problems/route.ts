@@ -13,9 +13,7 @@ export async function GET(request: NextRequest) {
     const difficulty = searchParams.get('difficulty')?.toLowerCase() || 'all';
     const start = (page - 1) * limit;
     const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-    }
+
     // Fetch problems from database
     const problems = await prisma.problem.findMany({
       orderBy: {
@@ -34,21 +32,24 @@ export async function GET(request: NextRequest) {
       difficulty: p.difficulty,
       acceptance: p.acceptance,
       tags: p.relatedTopics,
-      solved: true,
+      solved: false,
     }));
 
-    for(const problem of filteredProblems){
-      const submissions = await prisma.submission.findFirst({
-        where: {
-          problemId: problem.id,
-          userId: Number(session?.user?.id),
-          status: "PASSED",
-        },
-      });
-      if(submissions){
-        problem.solved = true;
-      }else{
-        problem.solved = false;
+    if(session?.user?.id){
+      const userId = Number(session?.user?.id);
+      for(const problem of filteredProblems){
+        const submissions = await prisma.submission.findFirst({
+          where: {
+            problemId: problem.id,
+            userId: userId,
+            status: "PASSED",
+          },
+        });
+        if(submissions){
+          problem.solved = true;
+        }else{
+          problem.solved = false;
+        }
       }
     }
     // Apply difficulty filter
